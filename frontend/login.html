@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <title>Login</title>
+        <script>
+        
+        window.onload = function() {
+            document.getElementById("error").style.display = "none";
+        }
+
+        function Submit() {
+            pw = document.getElementById('pw').value;
+
+            url = 'http://minecraft-gay.ddns.net/login'
+
+            const xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.responseText == 'success') {
+                        location.reload();
+                    } else {
+                        document.getElementById("error").style.display = "block";
+                    }
+                }
+            };
+
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+                pw,
+            }));
+        }
+
+        </script>
+    </head>
+    <body>
+        <form method="dialog">
+            <input id="pw" type="password" placeholder="password">
+            <button onclick="Submit()">Send</button>
+        </form>
+        <p id="error">Password is wrong</p>
+    </body>
+</html>

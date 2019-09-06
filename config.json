@@ -1,0 +1,9 @@
+{
+    "password": "",
+    "version": "",
+    "versions": [ "" ],
+    "start": "java -Xms512M -Xmx2G -jar server.jar",
+    "textdocument": [ "txt", "json", "yml", "properties" ],
+    "jsfiles": [ "edit", "config" ],
+    "pid": 0
+  }

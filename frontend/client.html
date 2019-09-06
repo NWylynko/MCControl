@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+  <meta charset="utf-8" />
+  <title>MC Control</title>
+  <script language="javascript" type="text/javascript">
+
+  var wsUri = "ws://minecraft-gay.ddns.net:3001";
+  var output;
+  var reconnecting = false;
+
+  function init()
+  {
+    output = document.getElementById("output");
+    // where the messages from the mc server get put
+    
+    newWebSocket();
+    // connect to the websocket backend
+
+    version();
+    // get version of the server
+  }
+
+  function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  function httpGetAsync(theUrl, callback)
+  {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function() { 
+          if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+              callback(xmlHttp.responseText);
+      }
+      xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+      xmlHttp.send(null);
+  }
+
+  function version()
+  {
+    let url = document.URL += 'config/version'
+    
+    httpGetAsync(url, function(response) {
+      title = document.getElementById('title');
+      title.innerHTML = "MC Control - " + response
+
+      button_files = document.getElementById('button_files');
+      button_files.onclick = function() { redirect('files/' + response + '/'); }
+    })
+
+  }
+
+  function onSubmit(id, MC) 
+  {
+    sender = document.getElementById(id);
+    var value;
+    id = id.split("_")
+    if (id[0] == 'input') {
+      value = sender.value
+      sender.value = ""
+    }
+    else if (id[0] == 'button') {
+      value = id[1]
+    }
+
+    pw = getCookie('password')
+
+    websocket.send(JSON.stringify({ pw, MC, value }));
+  }
+
+  function newWebSocket()
+  {
+    
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function() { 
+      writeToScreen('CONNECTED');
+      reconnecting = false 
+    };
+    websocket.onclose = function(){
+      if (!reconnecting) {
+        writeToScreen('DISCONNECTED')
+        writeToScreen('RECONNECTING')
+      }
+      setTimeout(function(){ 
+        newWebSocket(); 
+        reconnecting = true
+      }, 1000);
+      // if the connection closes, try to reconnect every second
+    };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+  }
+
+  function onMessage(evt)
+  {
+    message = JSON.parse(evt.data)
+    if (message.text) {
+      writeToScreen(message.data);
+    } else {
+      title = document.getElementById('title');
+      title.style.color = message.data;
+      // change the colour of the title to show if the server is
+      // red: stopped
+      // orange: starting, stopping
+      // green: started
+    }
+  }
+
+  function writeToScreen(message)
+  {
+    var pre = document.createElement("p");
+    pre.innerHTML = message;
+    output.insertBefore(pre, output.firstChild)
+  }
+
+  function redirect(url)
+  {
+    window.location.href += url;
+  }
+
+  window.addEventListener("load", init, false);
+
+  </script>
+
+  <h2 id="title" style="color: green">MC Control</h2>
+
+  <button id="button_start" onclick="onSubmit(id, false)">Start</button>
+  <button id="button_stop" onclick="onSubmit(id, false)">Stop</button>
+  <button id="button_files">Files</button>
+  <button id="button_config" onclick="redirect('config')">Config</button>
+
+  <form method="dialog">
+    <input id="input" type="text">
+    <button onclick="onSubmit('input', true)">Send</button>
+  </form>
+
+  <div id="output"></div>

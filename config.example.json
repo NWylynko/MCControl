@@ -1,0 +1,9 @@
+{
+    "password": "money",
+    "version": "1.8.8",
+    "versions": [ "1.8.8", "1.7.10" ],
+    "start": "java -Xms512M -Xmx2G -jar server.jar",
+    "textdocument": [ "txt", "json", "yml", "properties" ],
+    "jsfiles": [ "edit", "config" ],
+    "pid": 0
+  }
